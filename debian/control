@@ -1,0 +1,32 @@
+Source: node-shelljs
+Maintainer: Debian Javascript Maintainers <pkg-javascript-devel@lists.alioth.debian.org>
+Uploaders: Pirate Praveen <praveen@debian.org>
+Section: javascript
+Priority: optional
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-nodejs,
+               nodejs,
+               node-rechoir,
+               node-glob,
+               node-interpret
+Standards-Version: 4.5.1
+Vcs-Browser: https://salsa.debian.org/js-team/node-shelljs
+Vcs-Git: https://salsa.debian.org/js-team/node-shelljs.git
+Homepage: https://github.com/shelljs/shelljs
+
+Package: node-shelljs
+Architecture: all
+Depends: ${misc:Depends},
+         nodejs,
+         node-rechoir,
+         node-glob,
+         node-interpret
+Provides: ${nodejs:Provides}
+Description: Portable Unix shell commands for Node.js
+ ShellJS is a portable (Windows/Linux/OS X) implementation of Unix shell
+ commands on top of the Node.js API. You can use it to eliminate your shell
+ script's dependency on Unix while still keeping its familiar and powerful
+ commands. You can also install it globally so you can run it from outside
+ Node projects - say goodbye to those gnarly Bash scripts!
+ .
+ Node.js is an event-based server-side JavaScript engine.

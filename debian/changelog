@@ -1,0 +1,58 @@
+node-shelljs (0.8.4+~cs0.8.9-1) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Bump debhelper from old 11 to 12.
+  * Set debhelper-compat version in Build-Depends.
+  * Set upstream metadata fields: Bug-Submit.
+  * Remove obsolete fields Contact, Name from debian/upstream/metadata
+    (already present in machine-readable debian/copyright).
+  * Update standards version to 4.4.1, no changes needed.
+  * Remove constraints unnecessary since stretch:
+    + Build-Depends: Drop versioned constraint on node-glob and nodejs.
+    + node-shelljs: Drop versioned constraint on node-glob and nodejs in
+      Depends.
+
+  [ Pirate Praveen ]
+  * Add @types/shelljs as component
+  * Update github watch file regex and use version 4
+  * New upstream version 0.8.4+~cs0.8.9
+  * Add @types/shelljs as component
+  * Update github watch file regex and use version 4
+  * New upstream version 0.8.4+~cs0.8.9
+  * Switch to dh-sequence-nodejs auto install
+  * Bump Standards-Version to 4.5.1 (no changes needed)
+  * Bump debhelper compatibility level to 13
+
+ -- Pirate Praveen <praveen@debian.org>  Fri, 13 Aug 2021 01:27:39 +0530
+
+node-shelljs (0.8.3-1) unstable; urgency=medium
+
+  * Team upload
+
+  [ Praveen Arimbrathodiyil ]
+  * enable tests
+  * update build deps
+  * disable some cd tests
+  * install src
+  * update copyright
+
+  [ Xavier Guimard ]
+  * New upstream version 0.8.3
+  * Don't use upstream tests since ava isn't available
+  * Bump debhelper compatibility level to 11
+  * Declare compliance with policy 4.3.0
+  * Change section to javascript
+  * Update VCS fields to salsa
+  * Remove dh-buildinfo from build dependencies
+  * Update links to https
+  * Remove useless debian/dirs
+  * Update debian/copyright
+  * Update installed files list
+
+ -- Xavier Guimard <yadd@debian.org>  Thu, 17 Jan 2019 12:19:24 +0100
+
+node-shelljs (0.7.5-1) unstable; urgency=low
+
+  * Initial release (Closes: #703780)
+
+ -- Pirate Praveen <praveen@debian.org>  Fri, 09 Dec 2016 22:28:50 +0530
