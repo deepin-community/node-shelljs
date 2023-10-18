@@ -1,0 +1,1687 @@
+Description: replace ava by tape
+Author: Yadd <yadd@debian.org>
+Forwarded: not-needed
+Last-Update: 2022-01-09
+
+--- a/test/cat.js
++++ b/test/cat.js
+@@ -1,8 +1,8 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
++const shell = require('..');
+ 
+ shell.config.silent = true;
+ 
+@@ -12,24 +12,27 @@
+ 
+ test('no paths given', t => {
+   const result = shell.cat();
+-  t.truthy(shell.error());
++  t.ok(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, 'cat: no paths given');
++  t.end();
+ });
+ 
+ test('nonexistent file', t => {
+-  t.falsy(fs.existsSync('/asdfasdf')); // sanity check
++  t.false(fs.existsSync('/asdfasdf')); // sanity check
+   const result = shell.cat('/asdfasdf'); // file does not exist
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, 'cat: no such file or directory: /asdfasdf');
++  t.end();
+ });
+ 
+ test('directory', t => {
+   const result = shell.cat('test/resources/cat');
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, 'cat: test/resources/cat: Is a directory');
++  t.end();
+ });
+ 
+ //
+@@ -38,45 +41,51 @@
+ 
+ test('simple', t => {
+   const result = shell.cat('test/resources/cat/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'test1\n');
++  t.end();
+ });
+ 
+ test('multiple files', t => {
+   const result = shell.cat('test/resources/cat/file2', 'test/resources/cat/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'test2\ntest1\n');
++  t.end();
+ });
+ 
+ test('multiple files, array syntax', t => {
+   const result = shell.cat(['test/resources/cat/file2', 'test/resources/cat/file1']);
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'test2\ntest1\n');
++  t.end();
+ });
+ 
+ test('glob', t => {
+   const result = shell.cat('test/resources/file*.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+-  t.truthy(result.search('test1') > -1); // file order might be random
+-  t.truthy(result.search('test2') > -1);
++  t.true(result.search('test1') > -1); // file order might be random
++  t.true(result.search('test2') > -1);
++  t.end();
+ });
+ 
+ test('without EOF', t => {
+   const result = shell.cat('test/resources/cat/file3');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'test3');
++  t.end();
+ });
+ 
+ test('empty', t => {
+   const result = shell.cat('test/resources/cat/file5');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), '');
++  t.end();
+ });
+ 
+ //
+@@ -85,35 +94,40 @@
+ 
+ test('simple with numbers', t => {
+   const result = shell.cat('-n', 'test/resources/cat/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), '     1\ttest1\n');
++  t.end();
+ });
+ 
+ test('simple twelve lines file with numbers', t => {
+   const result = shell.cat('-n', 'test/resources/cat/file4');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), '     1\ttest4-01\n     2\ttest4-02\n     3\ttest4-03\n     4\ttest4-04\n     5\ttest4-05\n     6\ttest4-06\n     7\ttest4-07\n     8\ttest4-08\n     9\ttest4-09\n    10\ttest4-10\n    11\ttest4-11\n    12\ttest4-12\n');
++  t.end();
+ });
+ 
+ test('multiple with numbers', t => {
+   const result = shell.cat('-n', 'test/resources/cat/file2', 'test/resources/cat/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), '     1\ttest2\n     2\ttest1\n');
++  t.end();
+ });
+ 
+ test('simple numbers without EOF', t => {
+   const result = shell.cat('-n', 'test/resources/cat/file3');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), '     1\ttest3');
++  t.end();
+ });
+ 
+ test('multiple numbers without EOF', t => {
+   const result = shell.cat('-n', 'test/resources/cat/file3', 'test/resources/cat/file2', 'test/resources/cat/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), '     1\ttest3test2\n     2\ttest1\n');
++  t.end();
+ });
+--- a/test/common.js
++++ b/test/common.js
+@@ -1,8 +1,8 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
+-import utils from './utils/utils';
++const shell = require('..');
++const common = require('../src/common');
++const utils = require('./utils/utils');
+ 
+ shell.config.silent = true;
+ 
+--- a/test/config.js
++++ b/test/config.js
+@@ -1,8 +1,8 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
+-import utils from './utils/utils';
++const shell = require('..');
++const common = require('../src/common');
++const utils = require('./utils/utils');
+ 
+ //
+ // Valids
+--- a/test/cp.js
++++ b/test/cp.js
+@@ -1,10 +1,10 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
+-import utils from './utils/utils';
++const shell = require('..');
++const common = require('../src/common');
++const utils = require('./utils/utils');
+ 
+ const oldMaxDepth = shell.config.maxdepth;
+ const CWD = process.cwd();
+--- a/test/dirs.js
++++ b/test/dirs.js
+@@ -1,8 +1,8 @@
+-import path from 'path';
++const path = require('path');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
++const shell = require('..');
+ 
+ test.beforeEach(() => {
+   shell.config.resetForTesting();
+--- a/test/echo.js
++++ b/test/echo.js
+@@ -1,8 +1,8 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
+-import mocks from './utils/mocks';
++const shell = require('..');
++const utils = require('./utils/utils');
++const mocks = require('./utils/mocks');
+ 
+ shell.config.silent = true;
+ 
+--- a/test/env.js
++++ b/test/env.js
+@@ -1,6 +1,6 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
++const shell = require('..');
+ 
+ shell.config.silent = true;
+ 
+@@ -10,9 +10,11 @@
+ 
+ test('existing variables', t => {
+   t.is(shell.env.PATH, process.env.PATH);
++  t.end();
+ });
+ 
+ test('variables are exported', t => {
+   shell.env.SHELLJS_TEST = 'hello world';
+   t.is(shell.env.SHELLJS_TEST, process.env.SHELLJS_TEST);
++  t.end();
+ });
+--- a/test/exec.js
++++ b/test/exec.js
+@@ -1,12 +1,12 @@
+-import os from 'os';
+-import path from 'path';
+-import util from 'util';
++const os = require('os');
++const path = require('path');
++const util = require('util');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
+-import mocks from './utils/mocks';
++const shell = require('..');
++const utils = require('./utils/utils');
++const mocks = require('./utils/mocks');
+ 
+ const CWD = process.cwd();
+ const ORIG_EXEC_PATH = shell.config.execPath;
+--- a/test/find.js
++++ b/test/find.js
+@@ -1,6 +1,6 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
++const shell = require('..');
+ 
+ const CWD = process.cwd();
+ 
+@@ -17,6 +17,7 @@
+   const result = shell.find();
+   t.is(result.code, 1);
+   t.truthy(shell.error());
++  t.end();
+ });
+ 
+ //
+@@ -32,6 +33,7 @@
+   t.truthy(result.indexOf('dir1/dir11/a_dir11') > -1);
+   t.is(result.length, 11);
+   shell.cd('../..');
++  t.end();
+ });
+ 
+ test('simple path', t => {
+@@ -41,6 +43,7 @@
+   t.truthy(result.indexOf('test/resources/find/.hidden') > -1);
+   t.truthy(result.indexOf('test/resources/find/dir1/dir11/a_dir11') > -1);
+   t.is(result.length, 11);
++  t.end();
+ });
+ 
+ test('multiple paths - comma', t => {
+@@ -50,6 +53,7 @@
+   t.truthy(result.indexOf('test/resources/find/dir1/dir11/a_dir11') > -1);
+   t.truthy(result.indexOf('test/resources/find/dir2/a_dir1') > -1);
+   t.is(result.length, 6);
++  t.end();
+ });
+ 
+ test('multiple paths - array', t => {
+@@ -59,10 +63,12 @@
+   t.truthy(result.indexOf('test/resources/find/dir1/dir11/a_dir11') > -1);
+   t.truthy(result.indexOf('test/resources/find/dir2/a_dir1') > -1);
+   t.is(result.length, 6);
++  t.end();
+ });
+ 
+ test('nonexistent path', t => {
+   const result = shell.find('test/resources/find/nonexistent');
+   t.is(shell.error(), 'find: no such file or directory: test/resources/find/nonexistent');
+   t.is(result.code, 1);
++  t.end();
+ });
+--- a/test/global.js
++++ b/test/global.js
+@@ -1,10 +1,10 @@
+ /* globals cat, config, cp, env, error, mkdir, rm */
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+ import '../global';
+-import utils from './utils/utils';
++const utils = require('./utils/utils');
+ 
+ test.beforeEach(t => {
+   t.context.tmp = utils.getTempDir();
+--- a/test/grep.js
++++ b/test/grep.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ test.beforeEach(t => {
+   t.context.tmp = utils.getTempDir();
+--- a/test/head.js
++++ b/test/head.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
++const shell = require('..');
++const common = require('../src/common');
+ 
+ shell.config.silent = true;
+ 
+@@ -13,24 +13,27 @@
+ 
+ test('no args', t => {
+   const result = shell.head();
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
++  t.end();
+ });
+ 
+ test('file does not exist', t => {
+-  t.falsy(fs.existsSync('/asdfasdf')); // sanity check
++  t.false(fs.existsSync('/asdfasdf')); // sanity check
+   const result = shell.head('/asdfasdf'); // file does not exist
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, 'head: no such file or directory: /asdfasdf');
++  t.end();
+ });
+ 
+ test('directory', t => {
+-  t.truthy(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
++  t.true(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
+   const result = shell.head('test/resources/');
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, "head: error reading 'test/resources/': Is a directory");
++  t.end();
+ });
+ 
+ //
+@@ -48,90 +51,100 @@
+ 
+ test('simple', t => {
+   const result = shell.head('test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), topOfFile1.slice(0, 10).join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('multiple files', t => {
+   const result = shell.head('test/resources/head/file2.txt',
+     'test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), topOfFile2
+     .slice(0, 10)
+     .concat(topOfFile1.slice(0, 10))
+     .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('multiple files, array syntax', t => {
+   const result = shell.head(['test/resources/head/file2.txt',
+     'test/resources/head/file1.txt']);
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), topOfFile2
+     .slice(0, 10)
+     .concat(topOfFile1.slice(0, 10))
+     .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('reading more lines than are in the file (no trailing newline)', t => {
+   const result = shell.head('test/resources/file2', 'test/resources/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'test2\ntest1'); // these files only have one line (no \n)
++  t.end();
+ });
+ 
+ test('reading more lines than are in the file (with trailing newline)', t => {
+   const result = shell.head('test/resources/head/shortfile2',
+     'test/resources/head/shortfile1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'short2\nshort1\n'); // these files only have one line (with \n)
++  t.end();
+ });
+ 
+ test('Globbed file', t => {
+   const result = shell.head('test/resources/head/file?.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), topOfFile1
+     .slice(0, 10)
+     .concat(topOfFile2.slice(0, 10))
+     .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('With `\'-n\' <num>` option', t => {
+   const result = shell.head('-n', 4, 'test/resources/head/file2.txt',
+     'test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), topOfFile2
+     .slice(0, 4)
+     .concat(topOfFile1.slice(0, 4))
+     .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('With `{\'-n\': <num>}` option', t => {
+   const result = shell.head({ '-n': 4 }, 'test/resources/head/file2.txt',
+     'test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), topOfFile2
+     .slice(0, 4)
+     .concat(topOfFile1.slice(0, 4))
+     .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('negative values (-num) are the same as (numLines - num)', t => {
+   const result = shell.head('-n', -46, 'test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'file1 1\nfile1 2\nfile1 3\nfile1 4\n');
++  t.end();
+ });
+ 
+ test('right-hand side of a pipe', t => {
+   const result = shell.cat('test/resources/head/file1.txt').head();
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), topOfFile1.slice(0, 10).join('\n') + '\n');
++  t.end();
+ });
+--- a/test/ln.js
++++ b/test/ln.js
+@@ -1,10 +1,10 @@
+-import fs from 'fs';
+-import path from 'path';
++const fs = require('fs');
++const path = require('path');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ const CWD = process.cwd();
+ 
+--- a/test/ls.js
++++ b/test/ls.js
+@@ -1,10 +1,10 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
+-import utils from './utils/utils';
++const shell = require('..');
++const common = require('../src/common');
++const utils = require('./utils/utils');
+ 
+ const CWD = process.cwd();
+ 
+--- a/test/mkdir.js
++++ b/test/mkdir.js
+@@ -1,10 +1,10 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
+-import utils from './utils/utils';
++const shell = require('..');
++const common = require('../src/common');
++const utils = require('./utils/utils');
+ 
+ test.beforeEach(t => {
+   t.context.tmp = utils.getTempDir();
+--- a/test/mv.js
++++ b/test/mv.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ const CWD = process.cwd();
+ const numLines = utils.numLines;
+--- a/test/pipe.js
++++ b/test/pipe.js
+@@ -1,6 +1,6 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
++const shell = require('..');
+ 
+ shell.config.silent = true;
+ 
+@@ -11,6 +11,7 @@
+ test('commands like `rm` cannot be on the right side of pipes', t => {
+   t.is(shell.ls('.').rm, undefined);
+   t.is(shell.cat('test/resources/file1.txt').rm, undefined);
++  t.end();
+ });
+ 
+ //
+@@ -22,50 +23,58 @@
+     shell.cat('test/resources/file1.txt').cat().toString(),
+     shell.cat('test/resources/file1.txt').toString()
+   );
++  t.end();
+ });
+ 
+ test('piping ls() into cat() converts to a string-like object', t => {
+   t.is(shell.ls('test/resources/').cat().toString(), shell.ls('test/resources/').stdout);
++  t.end();
+ });
+ 
+ test('grep works in a pipe', t => {
+   const result = shell.ls('test/resources/').grep('file1');
+   t.is(result.toString(), 'file1\nfile1.js\nfile1.txt\n');
++  t.end();
+ });
+ 
+ test('multiple pipes work', t => {
+   const result = shell.ls('test/resources/').cat().grep('file1');
+   t.is(result.toString(), 'file1\nfile1.js\nfile1.txt\n');
++  t.end();
+ });
+ 
+ test('Equivalent to a simple grep() test case', t => {
+   const result = shell.cat('test/resources/grep/file').grep(/alpha*beta/);
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.toString(), 'alphaaaaaaabeta\nalphbeta\n');
++  t.end();
+ });
+ 
+ test('Equivalent to a simple sed() test case', t => {
+   const result = shell.cat('test/resources/grep/file').sed(/l*\.js/, '');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(
+     result.toString(),
+     'alphaaaaaaabeta\nhowareyou\nalphbeta\nthis line ends in\n\n'
+   );
++  t.end();
+ });
+ 
+ test('Sort a file by frequency of each line', t => {
+   const result = shell.sort('test/resources/uniq/pipe').uniq('-c').sort('-n');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.toString(), shell.cat('test/resources/uniq/pipeSorted').toString());
++  t.end();
+ });
+ 
+ test('Synchronous exec', t => {
+   const result = shell.cat('test/resources/grep/file').exec('shx grep "alpha*beta"');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.toString(), 'alphaaaaaaabeta\nalphbeta\n');
++  t.end();
+ });
+ 
+-test.cb('Asynchronous exec', t => {
++test('Asynchronous exec', t => {
+   shell.cat('test/resources/grep/file').exec('shx grep "alpha*beta"', (code, stdout) => {
+     t.is(code, 0);
+     t.is(stdout, 'alphaaaaaaabeta\nalphbeta\n');
+--- a/test/plugin.js
++++ b/test/plugin.js
+@@ -1,8 +1,8 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+ // This is the supported order for importing these files
+-import plugin from '../plugin';
+-import shell from '..';
++const plugin = require('../plugin');
++const shell = require('..');
+ 
+ let data = 0;
+ let fname;
+--- a/test/popd.js
++++ b/test/popd.js
+@@ -1,9 +1,9 @@
+-import path from 'path';
++const path = require('path');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import mocks from './utils/mocks';
++const shell = require('..');
++const mocks = require('./utils/mocks');
+ 
+ const rootDir = path.resolve();
+ 
+--- a/test/pushd.js
++++ b/test/pushd.js
+@@ -1,9 +1,9 @@
+-import path from 'path';
++const path = require('path');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import mocks from './utils/mocks';
++const shell = require('..');
++const mocks = require('./utils/mocks');
+ 
+ const rootDir = path.resolve();
+ 
+--- a/test/pwd.js
++++ b/test/pwd.js
+@@ -1,9 +1,9 @@
+-import path from 'path';
++const path = require('path');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ const cur = process.cwd();
+ 
+--- a/test/rm.js
++++ b/test/rm.js
+@@ -1,10 +1,10 @@
+-import fs from 'fs';
+-import path from 'path';
++const fs = require('fs');
++const path = require('path');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ test.beforeEach(t => {
+   t.context.tmp = utils.getTempDir();
+--- a/test/sed.js
++++ b/test/sed.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ test.beforeEach(t => {
+   t.context.tmp = utils.getTempDir();
+--- a/test/set.js
++++ b/test/set.js
+@@ -1,7 +1,7 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ const oldConfigSilent = shell.config.silent;
+ const uncaughtErrorExitCode = 1;
+--- a/test/shjs.js
++++ b/test/shjs.js
+@@ -1,8 +1,8 @@
+-import path from 'path';
++const path = require('path');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
++const shell = require('..');
+ 
+ const binPath = path.resolve(__dirname, '../bin/shjs');
+ 
+@@ -23,14 +23,16 @@
+   const result = runWithShjs('exit-codes.js');
+   t.is(result.code, 42);
+   t.is(result.stdout, '');
+-  t.falsy(result.stderr);
++  t.false(result.stderr);
++  t.end();
+ });
+ 
+ test('Zero exit code', t => {
+   const result = runWithShjs('exit-0.js');
+   t.is(result.code, 0);
+   t.is(result.stdout, '');
+-  t.falsy(result.stderr);
++  t.false(result.stderr);
++  t.end();
+ });
+ 
+ test('Stdout/Stderr', t => {
+@@ -38,20 +40,22 @@
+   t.is(result.code, 0);
+   t.is(result.stdout, 'stdout: OK!\n');
+   t.is(result.stderr, 'stderr: OK!\n');
++  t.end();
+ });
+ 
+ test('CoffeeScript', t => {
+   const result = runWithShjs('coffeescript.coffee');
+   t.is(result.code, 0);
+   t.is(result.stdout, 'CoffeeScript: OK!\n');
+-  t.falsy(result.stderr);
++  t.end();
+ });
+ 
+ test('Extension detection', t => {
+   const result = runWithShjs('a-file');
+   t.is(result.code, 0);
+   t.is(result.stdout, 'OK!\n');
+-  t.falsy(result.stderr);
++  t.false(result.stderr);
++  t.end();
+ });
+ 
+ //
+@@ -60,4 +64,5 @@
+ 
+ test('disallow require-ing', t => {
+   t.throws(() => require(binPath), 'Executable-only module should not be required');
++  t.end();
+ });
+--- a/test/sort.js
++++ b/test/sort.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
++const shell = require('..');
++const common = require('../src/common');
+ 
+ shell.config.silent = true;
+ 
+@@ -20,23 +20,26 @@
+ 
+ test('no args', t => {
+   const result = shell.sort();
+-  t.truthy(shell.error());
+-  t.truthy(result.code);
++  t.true(shell.error());
++  t.true(result.code);
++  t.end();
+ });
+ 
+ test('file does not exist', t => {
+-  t.falsy(fs.existsSync('/asdfasdf')); // sanity check
++  t.false(fs.existsSync('/asdfasdf')); // sanity check
+   const result = shell.sort('/asdfasdf');
+-  t.truthy(shell.error());
+-  t.truthy(result.code);
++  t.true(shell.error());
++  t.true(result.code);
++  t.end();
+ });
+ 
+ test('directory', t => {
+-  t.truthy(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
++  t.true(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
+   const result = shell.sort('test/resources/');
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, 'sort: read failed: test/resources/: Is a directory');
++  t.end();
+ });
+ 
+ //
+@@ -45,64 +48,72 @@
+ 
+ test('simple', t => {
+   const result = shell.sort('test/resources/sort/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/sort/sorted').toString());
++  t.end();
+ });
+ 
+ test('simple #2', t => {
+   const result = shell.sort('test/resources/sort/file2');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/sort/sorted').toString());
++  t.end();
+ });
+ 
+ test('multiple files', t => {
+   const result = shell.sort('test/resources/sort/file2', 'test/resources/sort/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), doubleSorted);
++  t.end();
+ });
+ 
+ test('multiple files, array syntax', t => {
+   const result = shell.sort(['test/resources/sort/file2', 'test/resources/sort/file1']);
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), doubleSorted);
++  t.end();
+ });
+ 
+ test('Globbed file', t => {
+   const result = shell.sort('test/resources/sort/file?');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), doubleSorted);
++  t.end();
+ });
+ 
+ test('With \'-n\' option', t => {
+   const result = shell.sort('-n', 'test/resources/sort/file2');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/sort/sortedDashN').toString());
++  t.end();
+ });
+ 
+ test('With \'-r\' option', t => {
+   const result = shell.sort('-r', 'test/resources/sort/file2');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/sort/sorted')
+     .trimRight()
+     .split('\n')
+     .reverse()
+     .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('With \'-rn\' option', t => {
+   const result = shell.sort('-rn', 'test/resources/sort/file2');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/sort/sortedDashN')
+     .trimRight()
+     .split('\n')
+     .reverse()
+     .join('\n') + '\n');
++  t.end();
+ });
+--- a/test/tail.js
++++ b/test/tail.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
++const shell = require('..');
++const common = require('../src/common');
+ 
+ shell.config.silent = true;
+ 
+@@ -13,23 +13,26 @@
+ 
+ test('no args', t => {
+   const result = shell.tail();
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
++  t.end();
+ });
+ 
+ test('file does not exist', t => {
+-  t.falsy(fs.existsSync('/asdfasdf')); // sanity check
++  t.false(fs.existsSync('/asdfasdf')); // sanity check
+   const result = shell.tail('/asdfasdf');
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
++  t.end();
+ });
+ 
+ test('directory', t => {
+-  t.truthy(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
++  t.true(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
+   const result = shell.tail('test/resources/');
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, "tail: error reading 'test/resources/': Is a directory");
++  t.end();
+ });
+ 
+ //
+@@ -47,14 +50,15 @@
+ 
+ test('simple', t => {
+   const result = shell.tail('test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), bottomOfFile1.slice(0, 10).reverse().join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('multiple files', t => {
+   const result = shell.tail('test/resources/head/file2.txt', 'test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(),
+     bottomOfFile2
+@@ -62,11 +66,12 @@
+       .reverse()
+       .concat(bottomOfFile1.slice(0, 10).reverse())
+       .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('multiple files, array syntax', t => {
+   const result = shell.tail(['test/resources/head/file2.txt', 'test/resources/head/file1.txt']);
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(),
+     bottomOfFile2
+@@ -74,25 +79,28 @@
+       .reverse()
+       .concat(bottomOfFile1.slice(0, 10).reverse())
+       .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('reading more lines than are in the file (no trailing newline)', t => {
+   const result = shell.tail('test/resources/file2', 'test/resources/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'test2\ntest1'); // these files only have one line (no \n)
++  t.end();
+ });
+ 
+ test('reading more lines than are in the file (with trailing newline)', t => {
+   const result = shell.tail('test/resources/head/shortfile2', 'test/resources/head/shortfile1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), 'short2\nshort1\n'); // these files only have one line (with \n)
++  t.end();
+ });
+ 
+ test('Globbed file', t => {
+   const result = shell.tail('test/resources/head/file?.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(),
+     bottomOfFile1
+@@ -100,12 +108,13 @@
+       .reverse()
+       .concat(bottomOfFile2.slice(0, 10).reverse())
+       .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('With `\'-n\' <num>` option', t => {
+   const result = shell.tail('-n', 4, 'test/resources/head/file2.txt',
+     'test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(),
+     bottomOfFile2
+@@ -113,12 +122,13 @@
+       .reverse()
+       .concat(bottomOfFile1.slice(0, 4).reverse())
+       .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('With `{\'-n\': <num>}` option', t => {
+   const result = shell.tail({ '-n': 4 }, 'test/resources/head/file2.txt',
+     'test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(),
+     bottomOfFile2
+@@ -126,12 +136,13 @@
+       .reverse()
+       .concat(bottomOfFile1.slice(0, 4).reverse())
+       .join('\n') + '\n');
++  t.end();
+ });
+ 
+ test('negative values are the same as positive values', t => {
+   const result = shell.tail('-n', -4, 'test/resources/head/file2.txt',
+     'test/resources/head/file1.txt');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(),
+     bottomOfFile2
+@@ -139,4 +150,5 @@
+       .reverse()
+       .concat(bottomOfFile1.slice(0, 4).reverse())
+       .join('\n') + '\n');
++  t.end();
+ });
+--- a/test/tempdir.js
++++ b/test/tempdir.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import { isCached, clearCache } from '../src/tempdir';
++const shell = require('..');
++const { isCached, clearCache } = require('../src/tempdir');
+ 
+ shell.config.silent = true;
+ 
+@@ -14,18 +14,20 @@
+ 
+ test('basic usage', t => {
+   const tmp = shell.tempdir();
+-  t.falsy(shell.error());
+-  t.truthy(fs.existsSync(tmp));
++  t.false(shell.error());
++  t.true(fs.existsSync(tmp));
+ 
+   // It's a directory
+-  t.truthy(shell.test('-d', tmp));
++  t.true(shell.test('-d', tmp));
++  t.end();
+ });
+ 
+ test('cache', t => {
+   clearCache(); // In case this runs after any test which relies on tempdir().
+-  t.falsy(isCached());
++  t.false(isCached());
+   const tmp1 = shell.tempdir();
+-  t.truthy(isCached());
++  t.true(isCached());
+   const tmp2 = shell.tempdir();
+   t.is(tmp1, tmp2);
++  t.end();
+ });
+--- a/test/test.js
++++ b/test/test.js
+@@ -1,7 +1,7 @@
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ shell.config.silent = true;
+ 
+@@ -11,22 +11,26 @@
+ 
+ test('no expression given', t => {
+   shell.test();
+-  t.truthy(shell.error());
++  t.true(shell.error());
++  t.end();
+ });
+ 
+ test('bad expression', t => {
+   shell.test('asdf');
+-  t.truthy(shell.error());
++  t.true(shell.error());
++  t.end();
+ });
+ 
+ test('bad expression #2', t => {
+   shell.test('f', 'test/resources/file1');
+-  t.truthy(shell.error());
++  t.true(shell.error());
++  t.end();
+ });
+ 
+ test('no file', t => {
+   shell.test('-f');
+-  t.truthy(shell.error());
++  t.true(shell.error());
++  t.end();
+ });
+ 
+ //
+@@ -36,96 +40,110 @@
+ 
+ test('-e option succeeds for files', t => {
+   const result = shell.test('-e', 'test/resources/file1');
+-  t.falsy(shell.error());
+-  t.truthy(result);
++  t.false(shell.error());
++  t.true(result);
++  t.end();
+ });
+ 
+ test('-e option fails if it does not exist', t => {
+   const result = shell.test('-e', 'test/resources/404');
+-  t.falsy(shell.error());
+-  t.falsy(result);
++  t.false(shell.error());
++  t.false(result);
++  t.end();
+ });
+ 
+ test('-d option succeeds for a directory', t => {
+   const result = shell.test('-d', 'test/resources');
+-  t.falsy(shell.error());
+-  t.truthy(result);
++  t.false(shell.error());
++  t.true(result);
++  t.end();
+ });
+ 
+ test('-f option fails for a directory', t => {
+   const result = shell.test('-f', 'test/resources');
+-  t.falsy(shell.error());
+-  t.falsy(result);
++  t.false(shell.error());
++  t.false(result);
++  t.end();
+ });
+ 
+ test('-L option fails for a directory', t => {
+   const result = shell.test('-L', 'test/resources');
+-  t.falsy(shell.error());
+-  t.falsy(result);
++  t.false(shell.error());
++  t.false(result);
++  t.end();
+ });
+ 
+ test('-d option fails for a file', t => {
+   const result = shell.test('-d', 'test/resources/file1');
+-  t.falsy(shell.error());
+-  t.falsy(result);
++  t.false(shell.error());
++  t.false(result);
++  t.end();
+ });
+ 
+ test('-f option succeeds for a file', t => {
+   const result = shell.test('-f', 'test/resources/file1');
+-  t.falsy(shell.error());
+-  t.truthy(result);
++  t.false(shell.error());
++  t.true(result);
++  t.end();
+ });
+ 
+ test('-L option fails for a file', t => {
+   const result = shell.test('-L', 'test/resources/file1');
+-  t.falsy(shell.error());
+-  t.falsy(result);
++  t.false(shell.error());
++  t.false(result);
++  t.end();
+ });
+ 
+ test('test command is not globbed', t => {
+   // regression #529
+   const result = shell.test('-f', 'test/resources/**/*.js');
+-  t.falsy(shell.error());
+-  t.falsy(result);
++  t.false(shell.error());
++  t.false(result);
++  t.end();
+ });
+ 
+ // TODO(nate): figure out a way to test links on Windows
+ test('-d option fails for a link', t => {
+   utils.skipOnWin(t, () => {
+     const result = shell.test('-d', 'test/resources/link');
+-    t.falsy(shell.error());
+-    t.falsy(result);
++    t.false(shell.error());
++    t.false(result);
++  t.end();
+   });
+ });
+ 
+ test('-f option succeeds for a link', t => {
+   utils.skipOnWin(t, () => {
+     const result = shell.test('-f', 'test/resources/link');
+-    t.falsy(shell.error());
+-    t.truthy(result);
++    t.false(shell.error());
++    t.true(result);
++  t.end();
+   });
+ });
+ 
+ test('-L option succeeds for a symlink', t => {
+   utils.skipOnWin(t, () => {
+     const result = shell.test('-L', 'test/resources/link');
+-    t.falsy(shell.error());
+-    t.truthy(result);
++    t.false(shell.error());
++    t.true(result);
++  t.end();
+   });
+ });
+ 
+ test('-L option works for broken symlinks', t => {
+   utils.skipOnWin(t, () => {
+     const result = shell.test('-L', 'test/resources/badlink');
+-    t.falsy(shell.error());
+-    t.truthy(result);
++    t.false(shell.error());
++    t.true(result);
++  t.end();
+   });
+ });
+ 
+ test('-L option fails for missing files', t => {
+   utils.skipOnWin(t, () => {
+     const result = shell.test('-L', 'test/resources/404');
+-    t.falsy(shell.error());
+-    t.falsy(result);
++    t.false(shell.error());
++    t.false(result);
++  t.end();
+   });
+ });
+--- a/test/to.js
++++ b/test/to.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ test.beforeEach(t => {
+   t.context.tmp = utils.getTempDir();
+--- a/test/toEnd.js
++++ b/test/toEnd.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ test.beforeEach(t => {
+   t.context.tmp = utils.getTempDir();
+--- a/test/touch.js
++++ b/test/touch.js
+@@ -1,11 +1,11 @@
+-import crypto from 'crypto';
+-import fs from 'fs';
++const crypto = require('crypto');
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
+-import utils from './utils/utils';
++const shell = require('..');
++const common = require('../src/common');
++const utils = require('./utils/utils');
+ 
+ test.beforeEach(t => {
+   t.context.tmp = utils.getTempDir();
+--- a/test/uniq.js
++++ b/test/uniq.js
+@@ -1,9 +1,9 @@
+-import fs from 'fs';
++const fs = require('fs');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import common from '../src/common';
++const shell = require('..');
++const common = require('../src/common');
+ 
+ shell.config.silent = true;
+ 
+@@ -13,38 +13,43 @@
+ 
+ test('no args', t => {
+   const result = shell.uniq();
+-  t.truthy(shell.error());
+-  t.truthy(result.code);
++  t.true(shell.error());
++  t.true(result.code);
++  t.end();
+ });
+ 
+ test('file does not exist', t => {
+-  t.falsy(fs.existsSync('/asdfasdf')); // sanity check
++  t.false(fs.existsSync('/asdfasdf')); // sanity check
+   const result = shell.uniq('/asdfasdf');
+-  t.truthy(shell.error());
+-  t.truthy(result.code);
++  t.true(shell.error());
++  t.true(result.code);
++  t.end();
+ });
+ 
+ test('directory', t => {
+-  t.truthy(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
++  t.true(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
+   const result = shell.uniq('test/resources/');
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, "uniq: error reading 'test/resources/'");
++  t.end();
+ });
+ 
+ test('output directory', t => {
+-  t.truthy(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
++  t.true(common.statFollowLinks('test/resources/').isDirectory()); // sanity check
+   const result = shell.uniq('test/resources/file1.txt', 'test/resources/');
+-  t.truthy(shell.error());
++  t.true(shell.error());
+   t.is(result.code, 1);
+   t.is(result.stderr, 'uniq: test/resources/: Is a directory');
++  t.end();
+ });
+ 
+ test('file does not exist with output directory', t => {
+-  t.falsy(fs.existsSync('/asdfasdf')); // sanity check
++  t.false(fs.existsSync('/asdfasdf')); // sanity check
+   const result = shell.uniq('/asdfasdf', 'test/resources/');
+   t.is(result.code, 1);
+-  t.truthy(shell.error());
++  t.true(shell.error());
++  t.end();
+ });
+ 
+ //
+@@ -53,52 +58,59 @@
+ 
+ test('uniq file1', t => {
+   const result = shell.uniq('test/resources/uniq/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/uniq/file1u').toString());
++  t.end();
+ });
+ 
+ test('uniq -i file2', t => {
+   const result = shell.uniq('-i', 'test/resources/uniq/file2');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/uniq/file2u').toString());
++  t.end();
+ });
+ 
+ test('with glob character', t => {
+   const result = shell.uniq('-i', 'test/resources/uniq/fi?e2');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/uniq/file2u').toString());
++  t.end();
+ });
+ 
+ test('uniq file1 file2', t => {
+   const result = shell.uniq('test/resources/uniq/file1', 'test/resources/uniq/file1t');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(
+     shell.cat('test/resources/uniq/file1u').toString(),
+     shell.cat('test/resources/uniq/file1t').toString()
+   );
++  t.end();
+ });
+ 
+ test('cat file1 |uniq', t => {
+   const result = shell.cat('test/resources/uniq/file1').uniq();
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/uniq/file1u').toString());
++  t.end();
+ });
+ 
+ test('uniq -c file1', t => {
+   const result = shell.uniq('-c', 'test/resources/uniq/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/uniq/file1c').toString());
++  t.end();
+ });
+ 
+ test('uniq -d file1', t => {
+   const result = shell.uniq('-d', 'test/resources/uniq/file1');
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.code, 0);
+   t.is(result.toString(), shell.cat('test/resources/uniq/file1d').toString());
++  t.end();
+ });
+--- a/test/which.js
++++ b/test/which.js
+@@ -1,10 +1,10 @@
+-import fs from 'fs';
+-import path from 'path';
++const fs = require('fs');
++const path = require('path');
+ 
+-import test from 'ava';
++const test = require('tape');
+ 
+-import shell from '..';
+-import utils from './utils/utils';
++const shell = require('..');
++const utils = require('./utils/utils');
+ 
+ shell.config.silent = true;
+ 
+@@ -14,13 +14,15 @@
+ 
+ test('no args', t => {
+   shell.which();
+-  t.truthy(shell.error());
++  t.true(shell.error());
++  t.end();
+ });
+ 
+ test('command does not exist in the path', t => {
+   const result = shell.which('asdfasdfasdfasdfasdf'); // what are the odds...
+-  t.falsy(shell.error());
+-  t.falsy(result);
++  t.false(shell.error());
++  t.false(result);
++  t.end();
+ });
+ 
+ //
+@@ -29,48 +31,40 @@
+ 
+ // TODO(nate): make sure this does not have a false negative if 'git' is missing
+ test('basic usage', t => {
+-  const git = shell.which('git');
+-  t.is(git.code, 0);
+-  t.falsy(git.stderr);
+-  t.falsy(shell.error());
+-  t.truthy(fs.existsSync(git.toString()));
+-});
+-
+-test('Windows can search with or without a .exe extension', t => {
+-  utils.skipOnUnix(t, () => {
+-    // This should be equivalent on Windows
+-    const node = shell.which('node');
+-    const nodeExe = shell.which('node.exe');
+-    t.falsy(shell.error());
+-    // If the paths are equal, then this file *should* exist, since that's
+-    // already been checked.
+-    t.is(node.toString(), nodeExe.toString());
+-  });
++  const ls = shell.which('ls');
++  t.is(ls.code, 0);
++  t.false(ls.stderr);
++  t.false(shell.error());
++  t.true(fs.existsSync(ls.toString()));
++  t.end();
+ });
+ 
+ test('Searching with -a flag returns an array', t => {
+   const commandName = 'node'; // Should be an existing command
+   const result = shell.which('-a', commandName);
+-  t.falsy(shell.error());
+-  t.truthy(result);
++  t.false(shell.error());
++  t.true(result);
+   t.not(result.length, 0);
++  t.end();
+ });
+ 
+ test('Searching with -a flag for not existing command returns an empty array', t => {
+   const notExist = '6ef25c13209cb28ae465852508cc3a8f3dcdc71bc7bcf8c38379ba38me';
+   const result = shell.which('-a', notExist);
+-  t.falsy(shell.error());
++  t.false(shell.error());
+   t.is(result.length, 0);
++  t.end();
+ });
+ 
+ test('Searching with -a flag returns an array with first item equals to the regular search', t => {
+   const commandName = 'node'; // Should be an existing command
+   const resultForWhich = shell.which(commandName);
+   const resultForWhichA = shell.which('-a', commandName);
+-  t.falsy(shell.error());
+-  t.truthy(resultForWhich);
+-  t.truthy(resultForWhichA);
++  t.false(shell.error());
++  t.true(resultForWhich);
++  t.true(resultForWhichA);
+   t.is(resultForWhich.toString(), resultForWhichA[0]);
++  t.end();
+ });
+ 
+ test('None executable files does not appear in the result list', t => {
+@@ -80,17 +74,18 @@
+   const pathEnv = process.env.PATH;
+ 
+   // make sure that file is exists (will throw error otherwise)
+-  t.truthy(fs.existsSync(matchingFile));
++  t.true(fs.existsSync(matchingFile));
+ 
+   process.env.PATH = extraPath + path.delimiter + process.env.PATH;
+   const resultForWhich = shell.which(commandName);
+   const resultForWhichA = shell.which('-a', commandName);
+-  t.falsy(shell.error());
+-  t.truthy(resultForWhich);
+-  t.truthy(resultForWhichA);
+-  t.truthy(resultForWhichA.length);
++  t.false(shell.error());
++  t.true(resultForWhich);
++  t.true(resultForWhichA);
++  t.true(resultForWhichA.length);
+   t.not(resultForWhich.toString(), matchingFile);
+   t.is(resultForWhichA.indexOf(matchingFile), -1);
+ 
+   process.env.PATH = pathEnv;
++  t.end();
+ });
