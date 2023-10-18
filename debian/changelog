@@ -1,3 +1,23 @@
+node-shelljs (0.8.5+~cs0.8.10-2) unstable; urgency=medium
+
+  * Team upload
+  * Fix /usr/bin/shjs link (Closes: #1036582)
+
+ -- Yadd <yadd@debian.org>  Tue, 23 May 2023 06:39:48 +0400
+
+node-shelljs (0.8.5+~cs0.8.10-1) unstable; urgency=medium
+
+  * Team upload
+  * Update standards version to 4.6.0, no changes needed.
+  * Add "Rules-Requires-Root: no"
+  * Fix filenamemangle
+  * Update nodejs dependency to nodejs:any
+  * Drop double require test
+  * New upstream version 0.8.5+~cs0.8.10
+  * Enable part of upstream test (tape instead of ava)
+
+ -- Yadd <yadd@debian.org>  Sun, 09 Jan 2022 08:08:59 +0100
+
 node-shelljs (0.8.4+~cs0.8.9-1) unstable; urgency=medium
 
   [ Debian Janitor ]

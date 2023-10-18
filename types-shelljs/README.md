@@ -8,7 +8,7 @@ This package contains type definitions for ShellJS (http://shelljs.org).
 Files were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/shelljs.
 
 ### Additional Details
- * Last updated: Tue, 06 Jul 2021 16:34:42 GMT
+ * Last updated: Thu, 16 Dec 2021 22:32:06 GMT
  * Dependencies: [@types/glob](https://npmjs.com/package/@types/glob), [@types/node](https://npmjs.com/package/@types/node)
  * Global values: none
 

@@ -3,25 +3,29 @@ Maintainer: Debian Javascript Maintainers <pkg-javascript-devel@lists.alioth.deb
 Uploaders: Pirate Praveen <praveen@debian.org>
 Section: javascript
 Priority: optional
-Build-Depends: debhelper-compat (= 13),
-               dh-sequence-nodejs,
-               nodejs,
-               node-rechoir,
-               node-glob,
-               node-interpret
-Standards-Version: 4.5.1
+Build-Depends: debhelper-compat (= 13)
+ , dh-sequence-nodejs
+ , coffeescript <!nocheck>
+ , node-glob <!nocheck>
+ , node-interpret <!nocheck>
+ , node-rechoir <!nocheck>
+ , node-tape <!nocheck>
+Standards-Version: 4.6.0
 Vcs-Browser: https://salsa.debian.org/js-team/node-shelljs
 Vcs-Git: https://salsa.debian.org/js-team/node-shelljs.git
 Homepage: https://github.com/shelljs/shelljs
+Testsuite: autopkgtest-pkg-nodejs
+Rules-Requires-Root: no
 
 Package: node-shelljs
 Architecture: all
-Depends: ${misc:Depends},
-         nodejs,
-         node-rechoir,
-         node-glob,
-         node-interpret
-Provides: ${nodejs:Provides}
+Depends: ${misc:Depends}
+ , node-glob
+ , node-interpret
+ , node-rechoir
+ , nodejs:any
+Provides:
+ ${nodejs:Provides}
 Description: Portable Unix shell commands for Node.js
  ShellJS is a portable (Windows/Linux/OS X) implementation of Unix shell
  commands on top of the Node.js API. You can use it to eliminate your shell

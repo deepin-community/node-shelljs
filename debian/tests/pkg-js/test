@@ -1,0 +1,1 @@
+tape test/cat.js test/env.js test/head.js test/sort.js test/tail.js test/tempdir.js test/test.js test/uniq.js test/which.js
